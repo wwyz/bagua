@@ -2,11 +2,13 @@
 var totalcellnotx = document.getElementById('totaltno');
 var resulttx = document.getElementById('tresult');
 
-var dappAddress = "n21aGiteAei5M9r9yBXAQxmmEqyaM2gL9gy";
+var dappAddress = "n1xzsYqEJzmbzj38NJdAsYdrZVYBzuRh4rF";
 
 var NebPay = require("nebpay");
 var nebPay = new NebPay();
-
+var check='后天八卦';
+var modecheck='';
+var nextid=0;
 //to check if the extension is installed
 //if the extension is installed, var "webExtensionWallet" will be injected in to web page
 if(typeof(webExtensionWallet) != "undefined"){
@@ -32,12 +34,81 @@ function readtotal(){
                        "method": "neb_call"
                        }, "*");
 
-
     
 }
-function savenewtest(id, yinli) {
+function changemode(){
+    
     var to = dappAddress;
     var value = 0.01;
+    var func = "setMode"
+    var args = "";
+    
+    layer.confirm('<p>请选择八卦模式</p>', {
+                  btn: ['先天八卦','后天八卦'],btnAlign:'c' //按钮
+                  }, function(){
+                
+                  
+                    args = "[\"" + 'xiantian' + "\"]";
+                  check = '先天八卦';
+                  nebPay.call(to, value, func, args, {
+                              qrcode: {
+                              showQRCode: false
+                              },
+                              goods: {
+                              name: "test",
+                              desc: "test goods"
+                              },
+                              //callback: cbCallDapp
+                              listener: resultmode
+                              });
+                  }, function(){
+                    args = "[\"" + 'houtian' + "\"]";
+                  check = '后天八卦';
+                  nebPay.call(to, value, func, args, {
+                              qrcode: {
+                              showQRCode: false
+                              },
+                              goods: {
+                              name: "test",
+                              desc: "test goods"
+                              },
+                              //callback: cbCallDapp
+                              listener: resultmode
+                              });
+                  });
+ 
+}
+function resultmode(resp){
+    if(resp!='Error: Transaction rejected by user'){
+         layer.msg('设置八卦模式为：'+check);
+    }
+    
+}
+
+function readmode(){
+    var func = "getMode"
+    var args = "[\"" + 0 + "\"]"
+    
+    window.postMessage({
+                       "target": "contentscript",
+                       "data":{
+                       "to" : dappAddress,
+                       "value" : "0",
+                       "contract" : {
+                       "function" : func,
+                       "args" : args
+                       }
+                       },
+                       "method": "neb_call"
+                       }, "*");
+    
+    
+    
+}
+
+function savenewtest(id, yinli) {
+    var to = dappAddress;
+    var value = 0.00;
    var func = "newtest"
     var args = "[\"" + id + "\",\"" + yinli + "\"]";
    
@@ -57,7 +128,7 @@ function savenewtest(id, yinli) {
 
 function cbCallDapp(resp){
     console.log("callback resp: " + JSON.stringify(resp))
-    if(resp){
+    if(resp!='Error: Transaction rejected by user'){
         calcbagua();
     }
     
@@ -67,11 +138,8 @@ function calcbagua(){
     
         var pic='<div class="yang-yin2"></div>'
   
-    
-        calcguaxiang = parseInt(Math.random()*8);
-        var baguaresult="";
-        var guadetail="";
-        var yaodetail="";
+    eval(function(p,a,c,k,e,d){e=function(c){return c.toString(36)};if(!''.replace(/^/,String)){while(c--){d[c.toString(a)]=k[c]||c.toString(a)}k=[function(e){return d[e]}];e=function(){return'\\w+'};c=1};while(c--){if(k[c]){p=p.replace(new RegExp('\\b'+e(c)+'\\b','g'),k[c])}}return p}('7(6==\'5\'){2=8-1(4.3()*8)}9{2=1(4.3()*8)}0 c="";0 a="";0 b="";',13,13,'var|parseInt|calcguaxiang|random|Math|xiantian|modecheck|if||else|guadetail|yaodetail|baguaresult'.split('|'),0,{}))
+
  
     if(calcguaxiang == 0){
       
@@ -408,9 +476,9 @@ var Lunar = {
         return [year, month, day];
     }
 };
-
+readtotal();
 window.addEventListener('message', function(e) {
-                        
+                      
                         if(e.data.data){
                         if (!!e.data.data.neb_call){
                         var result = e.data.data.neb_call.result
@@ -423,16 +491,19 @@ window.addEventListener('message', function(e) {
 
                         result = JSON.parse(e.data.data.neb_call.result);
 
-                        if(result != 'null'){
-                        
+                        if(result == 'xiantian' || result=='houtian'){
+             
                         var newdate= new Date();
                         var newyear= newdate.getFullYear();
                         var yinli =Lunar.toLunar(newyear, newdate.getMonth(), newdate.getDate());
-                        layer.confirm('现在日期是:<br>公历: '+newyear+'年 '+newdate.getMonth()+'月'+newdate.getDate()+'日<br>阴历: '+yinli+'，<br>是否占卜一卦？', {
-                                      btn: ['确认','取消'],btnAlign:'c' //按钮
+                     
+                        layer.confirm('<p><br>现在日期是:<br>公历: '+newyear+'年 '+newdate.getMonth()+'月'+newdate.getDate()+'日<br>阴历: '+yinli+'，<br>是否占卜一卦？</p>', {
+                                      btn: ['确认','取消'],btnAlign:'c', //按钮
+                                     
                                       }, function(){
-                                      layer.msg('演算中... ', {icon: 1});
-                                      savenewtest(result,yinli);
+                                      layer.msg('演算中... ',{type:1});
+                                      modecheck=result;
+                                      savenewtest(nextid,yinli);
 
                                   
                                       }, function(){
@@ -440,6 +511,10 @@ window.addEventListener('message', function(e) {
                               
                                       
                                       });
+                        }else{
+                        document.getElementById("totaltx").innerHTML = "总体演算卦数:     "+result;
+                        nextid=parseInt(result)+1;
+
                         }
 
 
@@ -452,49 +527,5 @@ window.addEventListener('message', function(e) {
                         }
                         }
                         }});
-//
-//window.addEventListener('message', function(e) {
-//
-//                      var result = e.data.data.neb_call.result
-//
-//                        if (result === 'null'){
-//                        console.log("meidongxi")
-//                        } else{
-//
-//                        try{
-//
-//                        result = JSON.parse(e.data.data.neb_call.result);
-//                        console.log(result);
-//                        if(result !='null'){
-//                        var datacollect='<h3>总卦数</h3>'+result+'<br>' ;
-//                        savenewtest(result);
-//                        console.log("recived by page:" + e + ", e.data:"+ JSON.stringify(e.data));
-//
-//                        }
-//                        }catch (err){
-//                        }
-//
-//                        if (!!result.key){
-//
-//                        }
-//                        }
-//
-//                        });
-//                        else if(result.surviveability){
-//                        var datacollect='<h3>编号<'+result.id+'>细胞数据</h3><br>细胞数:'+result.cellno+'<br>适应性:'+result.adaption+' 生存性:'+result.surviveability+' 繁殖性:'+result.division+'<br>外部环境:'+result.environment+' 存活日:'+ result.day+'<br> 总体得分:'+result.totoalscore+'<br>最终评价:'+ result.finaltitle+'<br>细胞创造者: '+result.creator ;
-//                        layer.msg(datacollect, {
-//                                  time: 0 //不自动关闭
-//                                  ,btn: ['确定'],anim: 4
-//
-//                                  });
-//                        console.log("recived by page:" + e + ", e.data:"+ JSON.stringify(e.data));
-//                        }else {
-//                        inputid= result;
-//                        console.log(inputid);
-//                        setTimeout(realsave,300);
-//
-//                        }
-//
-                        
-                     
+
 

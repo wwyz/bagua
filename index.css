@@ -58,7 +58,7 @@ body {
     padding: 0;
     line-height: 1.5em;
     font-family: STXihei, "Microsoft YaHei";
-    font-size: 14px;
+    font-size: 18px;
     color: #fff;
    
     
@@ -66,6 +66,7 @@ body {
 
 
 p{
+      color: #000;
     font-family: STXihei, "华文细黑", "Microsoft YaHei", "微软雅黑";
     font-size:16px;/*字体大小*/
     text-indent:2em;/*首行缩进两个单位*/

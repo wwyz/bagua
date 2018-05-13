@@ -31,6 +31,7 @@ var buguaDB = function () {
                                           admAdd: null,
                                           totaltest:null,
                                           balance:null,
+                                          mode:null
                                           });
     
 
@@ -51,6 +52,7 @@ buguaDB.prototype = {
         this.isOpen = true;
         this.totaltest = 0;
         this.balance = 0;
+        this.mode="houtian";
         
     },
     //view 拿信息
@@ -69,6 +71,17 @@ buguaDB.prototype = {
     getAdminAddress: function() {
         return this.admAdd;
     },
+    
+    //先天八卦，后天八卦
+    getMode: function() {
+        return this.mode;
+    },
+
+    
+    setMode:function(calcmode){
+        this.mode=calcmode;
+    },
+    
     //设置开始
     setIsOpen: function(isopen) {
         if (Blockchain.transaction.from === this.adminAddress) {
